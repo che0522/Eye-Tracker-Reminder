@@ -1,0 +1,55 @@
+import cv2
+import numpy as np
+
+# Set the width and height of the screen
+screen_width = 1920
+screen_height = 1080
+
+# Set the coordinates of the area that you want to focus on
+focus_x1 = 0
+focus_y1 = 0
+focus_x2 = 100
+focus_y2 = 100
+
+# Set the duration in seconds for which you want to focus on the area
+focus_duration = 60
+
+# Set the reminder message that you want to display
+reminder_message = "Remember to focus on this area!"
+
+# Initialize the eye tracker and get the first gaze position
+tracker = EyeTracker()
+gaze_position = tracker.get_gaze_position()
+
+# Initialize the timer for the focus duration
+timer = 0
+
+# Keep track of whether the user is currently focusing on the area
+is_focusing = False
+
+while True:
+    # Get the current gaze position
+    gaze_position = tracker.get_gaze_position()
+    x, y = gaze_position
+
+    # Check if the gaze position is within the focus area
+    if x > focus_x1 and x < focus_x2 and y > focus_y1 and y < focus_y2:
+        # Reset the timer if the user is focusing on the area
+        timer = 0
+        is_focusing = True
+    else:
+        # Increment the timer if the user is not focusing on the area
+        timer += 1
+
+    # Check if the focus duration has been exceeded
+    if timer > focus_duration and is_focusing:
+        # Display the reminder message
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        cv2.putText(np.zeros((screen_height, screen_width, 3), dtype=np.uint8), reminder_message, (10, 50), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
+        cv2.imshow("Reminder", np.zeros((screen_height, screen_width, 3), dtype=np.uint8))
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+        # Reset the timer and focus status
+        timer = 0
+        is_focusing = False
